@@ -12,6 +12,11 @@ case $key in
     echo "--> Enabled app vault extract"
     shift
     ;;
+    --extraapp)
+    EXTRA_APPS="$EXTRA_APPS"
+    echo "--> Enabled app extra extract"
+    shift
+    ;;
     *)
     darr+=("$1")
     shift
@@ -20,8 +25,10 @@ esac
 done
 
 mipay_apps="Mipay NextPay TSMClient UPTsmService"
+extra_apps=""
 private_apps=""
 [ -z "$EXTRA" ] || mipay_apps="$mipay_apps $EXTRA"
+[ -z "$EXTRA_APPS" ] || extra_apps="$extra_apps $EXTRA_APPS"
 [ -z "$EXTRA_PRIV" ] || private_apps="$private_apps $EXTRA_PRIV"
 
 base_dir=$PWD
@@ -293,6 +300,7 @@ extract() {
     file=$3
     apps=$4
     priv_apps=$5
+    ex_apps=$6
     dir=miui-$model-$ver
     img=$dir-system.img
     has_priv_apps=false
@@ -333,6 +341,10 @@ extract() {
         echo "----> copying $f..."
         $sevenzip x -odeodex/system/ "$img" app/$f >/dev/null || clean "$work_dir"
     done
+    for f in $ex_apps; do
+        echo "----> copying $f..."
+        $sevenzip x -odeodex/system/ "$img" app/$f >/dev/null || clean "$work_dir"
+    done
     echo "system/priv-app" > "$work_dir"/$privapp
     echo "$privapp" >> "$work_dir"/$privapp
     for f in $priv_apps; do
@@ -356,6 +368,18 @@ extract() {
     touch "$work_dir"/{$libmd,$libln}
     for f in $apps; do
         deodex "$work_dir" "$f" "$arch" "$PWD/$img" app || clean "$work_dir"
+    done
+    for f in $ex_apps; do
+        ex_arch=$arch
+        apppath=$work_dir/system/app/$f/oat/
+        for dir in $(ls "$apppath");
+        do
+            if [ -d $apppath/$dir ]; then
+                ex_arch=$dir
+                break
+            fi
+        done
+        deodex "$work_dir" "$f" "$ex_arch" "$PWD/$img" app || clean "$work_dir"
     done
     for f in $priv_apps; do
         deodex "$work_dir" "$(basename $f)" "$arch" "$PWD/$img" "$(dirname $f)" || clean "$work_dir"
@@ -421,7 +445,7 @@ for f in *.zip; do
     fi
     model=${arr[1]}
     ver=${arr[2]}
-    extract $model $ver $f "$mipay_apps" "$private_apps"
+    extract $model $ver $f "$mipay_apps" "$private_apps" "$extra_apps"
     hasfile=true
 done
 
