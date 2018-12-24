@@ -3,16 +3,16 @@
 declare -a urls=(
 
 # Rom URLs
-'http://bigota.d.miui.com/8.12.6/miui_MIMIX2_8.12.6_d0392b49ba_8.0.zip'
+'http://bigota.d.miui.com/8.12.13/miui_MIMIX2_8.12.13_0e27f149d1_8.0.zip'
 
 )
 
-EU_VER=8.12.6
+EU_VER=8.12.13
 
 declare -a eu_urls=(
 
 # EU Rom URLs
-'https://jaist.dl.sourceforge.net/project/xiaomi-eu-multilang-miui-roms/xiaomi.eu/MIUI-WEEKLY-RELEASES/8.12.6/xiaomi.eu_multi_MIMix2_8.12.6_v10-8.0.zip'
+'https://jaist.dl.sourceforge.net/project/xiaomi-eu-multilang-miui-roms/xiaomi.eu/MIUI-WEEKLY-RELEASES/8.12.13/xiaomi.eu_multi_MIMix2_8.12.13_v10-8.0.zip'
 
 )
 
@@ -41,6 +41,6 @@ done
 [[ "$1" == "keep"  ]] || rm -rf miui-*/ miui_*.zip
 for i in "${eu_urls[@]}"
 do
-   NO_EXTRA_FBE=1 bash cleaner-fix.sh "$i" || exit 1
+   bash cleaner-fix.sh --trafficfix --nofbe "$i" || exit 1
 done
 exit 0
