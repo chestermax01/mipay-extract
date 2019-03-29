@@ -372,14 +372,16 @@ extract() {
     for f in $ex_apps; do
         ex_arch=$arch
         apppath=$work_dir/system/app/$f/oat/
-        for dir in $(ls "$apppath");
-        do
-            if [ -d $apppath/$dir ]; then
-                ex_arch=$dir
-                break
-            fi
-        done
-        deodex "$work_dir" "$f" "$ex_arch" "$PWD/$img" app || clean "$work_dir"
+        if [[ -d $apppath ]]; then
+            for dir in $(ls "$apppath");
+            do
+                if [ -d $apppath/$dir ]; then
+                    ex_arch=$dir
+                    break
+                fi
+            done
+            deodex "$work_dir" "$f" "$ex_arch" "$PWD/$img" app || clean "$work_dir"
+        fi
     done
     for f in $priv_apps; do
         deodex "$work_dir" "$(basename $f)" "$arch" "$PWD/$img" "$(dirname $f)" || clean "$work_dir"
